@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>ND Plotter</title>
+	<style>
+
+:root, :root *{
+	margin: 0; padding: 0; border: none; box-sizing: border-box; font-size: 16px;
+}
+:root, body{
+	width: 100%; height: 100%;/*min-height: 100%;*/
+}
+.left{display: inline-block;}
+.left canvas{margin: 0 auto 0 auto;}
+.left .controls{padding: 2em 3em;}
+.botao{
+	display: inline-block;
+}
+.botao button{
+	margin: 1em; padding: 1em; border-radius: .618em;
+	color: white;
+}
+.botao button:hover{color: aliceblue;}
+
+.botao_passo button{background-color: indigo;}
+.botao_passo button:hover{background-color: blue;}
+.botao_repetir button{background-color: magenta;}
+.botao_repetir button:hover{background-color: lightblue;}
+.botao_parar button{background-color: orange;}
+.botao_parar button:hover{background-color: orangered;}
+
+	</style>
+	<script src="./basic-lib.js"></script>
+</head>
+<body>
+	<div class="left">
+		<canvas></canvas>
+	</div>
+	<div class="botao botao_passo"><button name="passo">Passo</button></div>
+	<div class="botao botao_repetir"><button name="repetir">Repetir</button></div>
+	<div class="botao botao_parar"><button name="parar">Parar</button></div>
+	<script src="src/complex.js"></script>
+	<script src="src/duals.wip.js"></script>
+	<script src="src/split-complex.wip.js"></script>
+	<script src="src/c3.js"></script>
+	<script src="src/quarternion.js"></script>
+	<script>
+const	element = document.querySelectorAll('canvas')[0],
+	canvas = element.getContext('2d'),
+	botao_passo = document.querySelectorAll('button[name=passo]')[0],
+	botao_repetir = document.querySelectorAll('button[name=repetir]')[0],
+	botao_parar = document.querySelectorAll('button[name=parar]')[0];
+
+var	SPAN, LENGTH = 1, RATIO, EFECTIVE_LENGTH, V, passo, A,
+	Scalar = [false, Complex, Dual, D, Complex3, H][4];
+	</script>
+	<script src="src/vector.js"></script>
+	<script>
+parseGET().then(data => {
+			
+SPAN = +data['SPAN'] || 4;
+LENGTH = +data['length'] || LENGTH;
+const	width = element.width = +data['width'] || 512,
+	height = element.height = +data['height'] || 512;
+
+switch(LENGTH){
+	case 4:
+		V = V4; break;
+	case 3:
+		V = V3; break;
+	case 2:
+		V = V2; break;
+	default:
+		V = Vetor; break;
+}
+console.log(Scalar, V);
+
+RATIO = [width / (SPAN + 4), - height / (SPAN + 4)];
+
+EFECTIVE_LENGTH = V.LENGTH;
+
+function tV2R(data){
+	//return data.map(d => Math.log((1 + Math.exp(d))/2));
+	//return data.map(d => d < 1 ? 2 / (1 + Math.exp(-d / SPAN)) : d + 1);
+	//return data.map(d => d < 1 ? 2 / (1 + Math.exp(-d / SPAN)) : Math.log(d + 1) + 1);
+	//return data.map(d => d < 1 ? 2 / (1 + Math.exp(-d / SPAN)) : 1 / (d + 1) + 1);
+	//return data.map(d => d < 0 ? 2 / (1 + Math.exp(-d * 2)) : d + 1);
+	  return data.map(d => d < 0 ? Math.exp(1 / d) : Math.log1p(Math.log1p(d)) + 1);
+}
+function tR2XY(r, i){
+	var t = i * Math.PI * 2 / EFECTIVE_LENGTH;
+	//(r, t) -> (x, y)
+	var x = r * Math.cos(t), y = r * Math.sin(t);
+
+	return [x * RATIO[0] + width/2, y * RATIO[1] + height/2];
+}
+function drawV(v, color = 'black'){
+	var { data } = v, r, coords, i;
+	//console.log(v)
+	if(Scalar) data = data.reduce(
+		(a, s) => a.concat(s.data), []);
+	r = tV2R(data);
+	//console.log(r)
+	coords = r.map(tR2XY);
+	//console.log(coords)
+	canvas.beginPath();
+	canvas.strokeStyle = color;
+	canvas.lineWidth = 1;
+	
+	canvas.moveTo(...coords[0]);
+	for(i = 1; i < EFECTIVE_LENGTH; i++){
+		canvas.lineTo(...coords[i]);
+	}
+	canvas.lineTo(...coords[0]);
+
+	canvas.stroke();
+}
+function drawAxis(){
+	canvas.beginPath();
+	canvas.strokeStyle = 'darkred';
+	canvas.lineWidth = 1.5;
+	
+	for(var i = 0; i < EFECTIVE_LENGTH; i++){
+		canvas.moveTo(...tR2XY(0, i));
+		canvas.lineTo(...tR2XY(Number.MAX_VALUE, i));
+	}
+	
+	canvas.stroke();
+}
+
+drawV(V.ZERO, 'red');
+drawV(V.ONES, 'green');
+drawV(V.ONES.scale(-1), 'green');
+
+/*A = [
+	new V([ 1.218977517597153, 1.1630011403971061, 0.49095736015914626 ]),
+	new V([ -0.037151103809932216, -0.7177391897625478, -0.4473634823965232 ])
+];*/
+A = [V.random(1), new V([new Scalar(0, 1, 1)])];
+//A = [V.ZERO, V.random(1)], K = V.random();
+
+//var K = V.random(1);
+//var K = new V([ -0.6267332551162321, -0.4764055846418398, -0.27949262456897084 ]);
+var K = new V([new Scalar(0, 1, 1)]);
+
+//x_{n + 1} = b + A x_n
+// A, b, Kb + A = t, Kt + b = q, Kq + t, ...
+console.log(`K = (${K.toString(';')})`);
+console.log(`A_0 = (${A[0].toString(';')})`);
+console.log(`A_1 = (${A[1].toString(';')})`);
+
+var h = 0;
+
+drawV(K, 'orange');
+drawV(A[0], `blue`);
+drawV(A[1], `cyan`);
+
+passo = function passo(){
+	var	l = A.length, v;
+	if(V === V3 || V === V4)
+		//a_{n + 1} = a_n x K + a_{n - 1}
+		v = A[l - 1].times(K).plus(A[l - 2]);
+	else{
+		v = V.from(A[l - 1]);
+		let q = v.data[0];
+		v.data[0] = q.times(K.data[0]);
+		//v = A[l - 1].scale(A[l - 1].versor().dot(K.versor())).plus(A[l - 2]);
+	}
+	A.push(v);
+	console.log(`A_${l} = (${v.toString(';')})`);
+	drawV(v, `hsl(${h = (h + 11) % 360}, 70%, 55%)`);
+}
+
+var loop = { running: false, code: null };
+botao_passo.addEventListener('click', passo);
+botao_repetir.addEventListener('click', () => {
+	if(loop.running) return;
+	loop.running = true; loop.code = setInterval(passo, 200);
+});
+botao_parar.addEventListener('click', () => {
+	if(!loop.running) return;
+	clearInterval(loop.code);
+	loop.running = false; loop.code = null;
+});
+
+});
+
+	</script>
+</body>
+</html>
