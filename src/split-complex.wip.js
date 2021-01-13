@@ -77,7 +77,7 @@ class D{
 		return this.times(d.inverse());
 	}
 	pow(...d){
-		var	ctn = this.constructor;
+		var ctn = this.constructor;
 		
 		d = ctn.asSplitComplex(...d);
 		
@@ -126,9 +126,12 @@ class D{
 	}
 	log(){
 		//e^(a + j t ) = e^a (cosh t + j sinh t) -> j t + log(a)
-		var [ sinal, modulo ] = Math.split(this.module);
-		var t = Math.asinh(this.b / modulo * sinal);
-		return new this.constructor(Math.log(modulo) / 2, t);
+		//var [ sinal, modulo ] = Math.split(this.module);
+		//var t = Math.asinh(this.b / modulo * sinal);
+		//return new this.constructor(Math.log(modulo) / 2, t);
+		var { a, b } = this;
+		var l1 = Math.log(a + b) / 2, l2 = Math.log(a - b) / 2;
+		return new this.constructor(l1 + l2, l1 - l2);
 	}
 	toLongFixed(k){
 		if(k === undefined) k = 6;

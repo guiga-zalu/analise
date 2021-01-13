@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Force Field Plotter</title>
+		<style>
+* { box-sizing: border-box; }
+:root, body { max-width: 100%; max-height: 100%; margin: 0; }
+body {
+	display: grid;
+	grid-template-areas: "aside main" "aside main";
+	grid-template-columns: 15% 85%;
+	/* grid-column-gap: 5%; */
+}
+main, aside { display: inline-block; position: relative; }
+aside {
+	grid-area: aside;
+	left: 0; height: 100%; max-width: 18em; font-size: 1em;
+	overflow-y: scroll; overflow-x: visible;
+}
+main { grid-area: main; right: 0; }
+/* main canvas { width: 100%; } */
+.logger { font-family: "Fira Code Regular", monospace; }
+/* canvas{ width: 80%; margin-left: 10%; margin-right: 10%; } */
+		</style>
+	</head>
+	<body>
+		<aside>
+			<p class="logger"></p>
+		</aside>
+		<main>
+			<canvas id="each-field-visualizer" height="340px"></canvas>
+			<canvas id="all-fields-visualizer" height="340px"></canvas>
+		</main>
+		<script src="base.js" defer></script>
+		<script src="force-field-plotter.js" defer></script>
+	</body>
+</html>

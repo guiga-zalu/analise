@@ -32,7 +32,7 @@
 .botao_parar button:hover{background-color: orangered;}
 
 	</style>
-	<script src="./basic-lib.js"></script>
+	<script src="../basic-lib.js"></script>
 </head>
 <body>
 	<div class="left">
@@ -41,11 +41,11 @@
 	<div class="botao botao_passo"><button name="passo">Passo</button></div>
 	<div class="botao botao_repetir"><button name="repetir">Repetir</button></div>
 	<div class="botao botao_parar"><button name="parar">Parar</button></div>
-	<script src="src/complex.js"></script>
-	<script src="src/duals.wip.js"></script>
-	<script src="src/split-complex.wip.js"></script>
-	<script src="src/c3.js"></script>
-	<script src="src/quarternion.js"></script>
+	<script src="../src/complex.js"></script>
+	<script src="../src/duals.wip.js"></script>
+	<script src="../src/split-complex.wip.js"></script>
+	<script src="../src/c3.js"></script>
+	<script src="../src/quarternion.js"></script>
 	<script>
 const	element = document.querySelectorAll('canvas')[0],
 	canvas = element.getContext('2d'),
@@ -56,7 +56,7 @@ const	element = document.querySelectorAll('canvas')[0],
 var	SPAN, LENGTH = 1, RATIO, EFECTIVE_LENGTH, V, passo, A,
 	Scalar = [false, Complex, Dual, D, Complex3, H][4];
 	</script>
-	<script src="src/vector.js"></script>
+	<script src="../src/vector.js"></script>
 	<script>
 parseGET().then(data => {
 			

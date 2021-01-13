@@ -62,7 +62,7 @@ class Vetor{
 	versor(){
 		const V = this.constructor, { r } = this;
 		if(V.scalar) return r.eq(V.scalarBase.ZERO) ? this : this.scale(r.inverse());
-		return r ? this.scale(1 / r) : this;
+		return r && r !== 1 ? this.scale(1 / r) : this;
 	}
 	ceil(){
 		const V = this.constructor;
@@ -91,6 +91,15 @@ class Vetor{
 	angle(b){return Vetor.angle(this, b);}
 	parallel(b){return Vetor.parallel(this, b);}
 	toString(str = ','){return this.data.map(n2s).join(str + ' ');}
+	
+	exp(){
+		return this.versor().scale(Math.sin(this.module));
+	}
+	log(){
+		let r = Math.asin(this.module);
+		return this.versor().scale(r + (r > 0 ? 0 : 2 * Math.PI));
+	}
+	
 	static eq(a, b, e = 0){
 		var { data } = b;
 		if(this.scalar)

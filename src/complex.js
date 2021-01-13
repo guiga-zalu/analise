@@ -137,8 +137,56 @@ class Complex{
 	csch(){return this.sinh().inverse();}
 	cot(){return this.tan().inverse();}
 	coth(){return this.tanh().inverse();}
+	acos(a = false){
+		//2c = exp(iz) + exp(-iz) -> 2cy = y² + 1 -> 0 = y² - 2cy + 1
+		//y = c +- sq[c² - 1] -> z = ln(c +- sq[c² - 1]) / i
+		const ctn = this.constructor, { i } = ctn;
+		let delta = this.pow(2).sub(1).sqrt();
+		return this.plus(a ? delta.negate() : delta).log().div(i);
+	}
+	acosh(a = false){
+		//2c = exp(z) + exp(-z) -> 2cy = y² + 1 -> 0 = y² - 2cy + 1
+		//y = c +- sq[c² - 1] -> z = ln(c +- sq[c² - 1])
+		let delta = this.pow(2).sub(1).sqrt();
+		return this.plus(a ? delta.negate() : delta).log();
+	}
+	asin(a = false){
+		//2is = exp(iz) - exp(-iz) -> 2isy = y² - 1 -> 0 = y² - 2isy - 1
+		//y = s +- sq[1 - s²] -> z = ln(is +- sq[1 - s²]) / i
+		const ctn = this.constructor, { i } = ctn;
+		let delta = this.pow(2).negate().sum(1).sqrt();
+		return this.times(i).plus(a ? delta.negate() : delta).log().div(i);
+	}
+	asinh(a = false){
+		//2s = exp(z) - exp(-z) -> 2sy = y² - 1 -> 0 = y² - 2sy - 1
+		//y = s +- sq[s² + 1] -> z = ln(s +- sq[s² + 1])
+		let delta = this.pow(2).sum(1).sqrt();
+		return this.plus(a ? delta.negate() : delta).log();
+	}
+	atan(){
+		//t = [(y - 1/y)/(2i)]/[(y + 1/y)/2] = (y - 1/y)/(y + 1/y)/i
+		//it = (y² - 1)/(y¹ + 1) -> (y² + 1)it = y² - 1
+		//y²(it - 1) = - (1 + it) -> y = sq[- (it + 1)/(it - 1)]
+		//z = ln(y) / i
+		const ctn = this.constructor, { i } = ctn;
+		let it = this.times(i);
+		return it.plus(1).div(it.sub(1)).negate().log().div(2).div(i);
+	}
+	atanh(){
+		//t = [(y - 1/y)/2]/[(y + 1/y)/2] = (y - 1/y)/(y + 1/y)
+		//t = (y² - 1)/(y¹ + 1) -> (y² + 1)t = y² - 1
+		//y²(t - 1) = - (1 + t) -> y = sq[- (t + 1)/(t - 1)]
+		//z = ln(y)
+		return this.plus(1).div(this.sub(1)).negate().log().div(2);
+	}
+	asec(a){ return this.inverse().acos(a); }
+	acsc(a){ return this.inverse().asin(a); }
+	acot(){ return this.inverse().atan(); }
+	asech(a){ return this.inverse().acosh(a); }
+	acsch(a){ return this.inverse().asinh(a); }
+	acoth(){ return this.inverse().atanh(); }
 	sqrt(){
-		return this.pow(1/2);
+		return this.pow(.5);
 	}
 	versor(){
 		return new this.constructor(!1, !1, 1, this.t);
@@ -200,6 +248,8 @@ class Complex{
 		this.t = ctn.angle(a, b);
 		return this;
 	}
+	abs(){ return this.r; }
+	sign(){ return this.versor(); }
 	static is(a){return this.isComplex(a);}
 	static isComplex(a){return a instanceof this;}
 	static from(...a){

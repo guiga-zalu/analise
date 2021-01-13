@@ -1,1 +1,12 @@
 /.vscode
+plotters/particle-simulator-master/.gitignore
+plotters/particle-simulator-master/alata-v1-latin-regular.eot
+plotters/particle-simulator-master/alata-v1-latin-regular.svg
+plotters/particle-simulator-master/alata-v1-latin-regular.ttf
+plotters/particle-simulator-master/alata-v1-latin-regular.woff
+plotters/particle-simulator-master/alata-v1-latin-regular.woff2
+plotters/particle-simulator-master/index.html
+plotters/particle-simulator-master/README.md
+plotters/particle-simulator-master/sim.js
+plotters/particle-simulator-master/style.css
+plotters/particle-simulator-master.zip
