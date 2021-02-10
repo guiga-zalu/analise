@@ -113,11 +113,14 @@ function update(){
 
 World.addField([
 	new Field("eletric", "charge", function eletric(c0, charge){
-		return p => Particle.sign(c0, p).self_scale(charge / (1 + Particle.distance(p, c0) ** 2) / 8);
-	}) , 
+		return p => Particle.sign(c0, p).self_scale(charge / (1 + Particle.distance(p, c0) ** 2));
+	}, 8) , 
 	new Field("repulsive", "charge", function repulsive(c0, charge){
-		return p => Particle.sign(c0, p).scale(- charge / (1 + (Particle.distance(c0, p) ** 4)) / 8);
-	})
+		return p => Particle.sign(c0, p).scale(- charge / (1 + (Particle.distance(c0, p) ** 4)));
+	}, 8)/* ,
+	new Field("gravitational", "mass", function gravitational(c0, mass){
+		return p => Particle.sign(c0, p)._scale(- mass / (1 + Particle.distance(c0, p) ** 2));
+	}) */
 ]);
 
 World.addParticle([
@@ -140,7 +143,8 @@ for(var i = World.span.x[0], l = World.span.x[1]; i <= l; i += 0.1){
 	World.registerCoordinate(new SpaceTimeFabric(i, 0, { charge: 1, mass: 0, radius: 1.5 }))
 }
 
-SpaceTimeFabric.correction = 1 / 10;
+SpaceTimeFabric.correction = 10;
+SpaceTimeFabric.MAX_DEVIATION = 100;
 
 draw();
 setInterval(update, 1e2);

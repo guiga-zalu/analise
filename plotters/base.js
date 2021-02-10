@@ -83,6 +83,13 @@ class Vetor{
 		return this.self_scale((r2 + (r2 > 0 ? 0 : 2 * Math.PI)) / r1);
 	}
 	self_sign(){ return this.self_versor(); }
+	_scale(){ return this.self_scale(...arguments); }
+	_sum(){ return this.self_sum(...arguments); }
+	_sub(){ return this.self_sub(...arguments); }
+	_negate(){ return this.self_negate(...arguments); }
+	_versor(){ return this.self_versor(...arguments); }
+	_exp(){ return this.self_exp(...arguments); }
+	_log(){ return this.self_log(...arguments); }
 }
 Vetor.ZERO = new Vetor([0]);
 
@@ -242,7 +249,7 @@ class VSum extends ArrayMathFunction{
 	// parts = [];
 	constructor(...parts){
 		let _parts = [];
-		super(function(){ return _parts.reduce((r, s) => r.self_sum(s(...arguments)), new Vetor([])); });
+		super(function(){ return _parts.reduce((r, s) => r._sum(s(...arguments)), new Vetor([])); });
 		
 		this.parts = _parts;
 		this.add(...parts);
@@ -405,13 +412,16 @@ class SpaceTimeFabric extends Particle{
 		// this.coords.data[0] = this.coords.data[0];
 		if(name === "all"){
 			const	{ deviations } = this,
-					r = deviations.reduce((a, b) => a + b, 0);
+					MAX2 = SpaceTimeFabric.MAX_DEVIATION ** 2,
+					r = deviations.reduce((a, b) => (a + b) / (1 + a * b / MAX2), 0);
 			
-			this.coords.data[1] = r / SpaceTimeFabric.correction;
+			this.coords.data[1] = r * SpaceTimeFabric.correction;
 		}else
 			this.coords.data[1] = this.deviation[name];
 	}
 }
+SpaceTimeFabric.correction = 1;
+SpaceTimeFabric.MAX_DEVIATION = 100;
 /**
  * @class Field
  */
@@ -424,9 +434,10 @@ class Field{
 	 * @param { !string } name
 	 * @param { string } particleProperty
 	 * @param { Field.processor } _function
+	 * @param { number } [constant = 1]
 	 * @memberof Field
 	 */
-	constructor(name, particleProperty, _function){
+	constructor(name, particleProperty, _function, constant = 1){
 		/**
 		 * @type { Particle[] }
 		 */
@@ -436,6 +447,7 @@ class Field{
 		this.processor = _function;
 		this.sum = new VSum();
 		this.resetField();
+		this.constant = constant;
 	}
 	get length(){ return this.particles.length; }
 	set newParticle(x){ x instanceof Particle ? this.particles.push(x) : null; }
@@ -456,25 +468,25 @@ class Field{
 	update(){
 		this.resetField();
 		// log(`Updating Field [${this.name}]`);
-		const { particleProperty: pp } = this;
+		const { particleProperty: pp, sum, constant } = this;
 		
 		// Get field status from particles
 		for(let particle of this.particles){
 			// The SpaceTimeFabric has no effects uppon the field
 			if(particle instanceof SpaceTimeFabric) continue;
-			this.sum.push(this.processor(particle.coords, particle.props[pp]));
+			sum.push(this.processor(particle.coords, particle.props[pp]));
 		}
 		
 		/* for(var i = - 2; i < 3; i++){
 			let k = new Vetor([i, 0]);
-			console.log(this.sum.parts[0](k).data, this.sum(k).data);
+			console.log(sum.parts[0](k).data, sum(k).data);
 		} */
 		
 		// Put field status / forces onto particles
 		for(let particle of this.particles){
-			// console.log(this.sum(particle.coords))
+			// console.log(sum(particle.coords))
 			particle.movement.sum(
-				particle.process(this.sum(particle.coords), this), this
+				particle.process(sum(particle.coords)._scale(constant), this), this
 			);
 		}
 		
@@ -484,6 +496,11 @@ class Field{
 /**
  * @callback Field.processor
  * @param { !number[2] } base_coords
- * @param { !string } property
+ * @param { !number } property
+ * @returns { Field.processor2 }
+ */
+/**
+ * @callback Field.processor2
  * @param { !number[2] } final_coords
+ * @returns { Vetor } Saída
  */
